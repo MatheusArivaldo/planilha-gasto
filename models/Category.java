@@ -38,6 +38,12 @@ public class Category {
   // #region Methods
 
   public void addBranch(Branch branch) {
+    for (int i = 0; i < branches.size(); i++) {
+      if (branches.get(i).getName().equals(branch.getName())) {
+        throw new IllegalArgumentException("Branch " + branch.getName() + " already exists.");
+      }
+    }
+
     branches.add(branch);
   }
 

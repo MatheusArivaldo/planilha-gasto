@@ -34,6 +34,9 @@ public class MainFrame {
   private Year selectedYear;
   private JButton selectedYearButton;
 
+  private Category selectedCategory;
+  private JButton selectedCategoryButton;
+
   private Color selectedColor = Color.CYAN;
   private Color unselectedColor = new JButton().getBackground();
 
@@ -276,6 +279,63 @@ public class MainFrame {
   }
 
   public void addBranch(ActionEvent event) {
+    if (selectedCategory == null) {
+      DialogHelper.showMessageDialog(
+          "Adicionar Categoria",
+          "Selecione uma categoria primeiro!",
+          DialogType.ERROR);
+      return;
+    }
+
+    String[] inputs = DialogHelper.showDoubleInputDialog(
+        "Adicionar Branch",
+        "Digite o nome da branch:",
+        "Digite o valor da branch:");
+
+    if (inputs == null || inputs[0].isEmpty() || inputs[1].isEmpty()) {
+      DialogHelper.showMessageDialog(
+          "Adicionar Branch",
+          "Nome e valor da branch nao podem ser vazios!",
+          DialogType.ERROR);
+      return;
+    }
+
+    if (!inputs[0].matches("^[a-zA-Z0-9 ]+$")) {
+      DialogHelper.showMessageDialog(
+          "Adicionar Branch",
+          "Nome da branch nao pode conter caracteres especiais!",
+          DialogType.ERROR);
+      return;
+    }
+
+    try {
+      Branch branch = new Branch(inputs[0], Double.parseDouble(inputs[1]));
+      selectedCategory.addBranch(branch);
+
+      branchesPanel.revalidate();
+      branchesPanel.repaint();
+
+      updateCategories();
+
+      DialogHelper.showMessageDialog(
+          "Adicionar Branch",
+          "Branch " + inputs[0] + " adicionada com sucesso!",
+          DialogType.SUCCESS);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        DialogHelper.showMessageDialog(
+            "Adicionar Branch",
+            "Branch " + inputs[0] + " ja existe!",
+            DialogType.ERROR);
+      } else {
+        DialogHelper.showMessageDialog(
+            "Adicionar Branch",
+            "Erro desconhecido ao adicionar branch!",
+            DialogType.ERROR);
+        e.printStackTrace();
+      }
+    }
+
     System.err.println("Add Branch");
   }
 
@@ -298,6 +358,8 @@ public class MainFrame {
 
   public void updateCategories() {
     categoriesPanel.removeAll();
+    selectedCategory = null;
+    selectedCategoryButton = null;
 
     if (selectedYear != null) {
       for (int i = 0; i < selectedYear.getCategories().size(); i++) {
@@ -309,6 +371,10 @@ public class MainFrame {
 
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
+  }
+
+  public void updateBranches() {
+
   }
 
   // #endregion
@@ -329,12 +395,13 @@ public class MainFrame {
     categoryButton.setFocusable(false);
     categoryButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
     categoryButton.setAlignmentX(0.5f);
+    categoryButton.addActionListener(e -> selectCategory(category, (JButton) e.getSource()));
     return categoryButton;
   }
 
   // #endregion
 
-  // #region Helpers
+  // #region selection
 
   public void selectYear(Year year, JButton yearButton) {
     if (selectedYear == null) {
@@ -353,6 +420,25 @@ public class MainFrame {
     }
 
     updateCategories();
+  }
+
+  public void selectCategory(Category category, JButton categoryButton) {
+    if (selectedCategory == null || selectedYear == null) {
+      selectedCategory = category;
+      selectedCategoryButton = categoryButton;
+      selectedCategoryButton.setBackground(selectedColor);
+    } else if (selectedCategory.equals(category)) {
+      selectedCategory = null;
+      selectedCategoryButton.setBackground(unselectedColor);
+      selectedCategoryButton = null;
+    } else {
+      selectedCategory = category;
+      selectedCategoryButton.setBackground(unselectedColor);
+      selectedCategoryButton = categoryButton;
+      selectedCategoryButton.setBackground(selectedColor);
+    }
+
+    updateBranches();
   }
 
   // #endregion
