@@ -16,7 +16,6 @@ public class VisualBuilder {
   public static JButton buildButton(String text) {
     var button = new JButton(text);
     button.setFocusable(false);
-    button.setPreferredSize(new Dimension(0, 30));
     button.setAlignmentX(0.5f);
     return button;
   }

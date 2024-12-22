@@ -29,6 +29,10 @@ public class Year {
     return totalValue;
   }
 
+  public String getDisplayName() {
+    return year + " [" + CustomUtilities.formatToCurrency(getTotalValue()) + "]";
+  }
+
   // #endregion
 
   // #region Methods

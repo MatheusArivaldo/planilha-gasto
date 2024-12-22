@@ -1,6 +1,8 @@
 package visual;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+
 import javax.swing.*;
 
 import models.*;
@@ -13,7 +15,6 @@ public class MainFrame {
   private JFrame root;
 
   private JPanel bodyPanel;
-  // private JPanel footerPanel;
 
   private JPanel yearContainer;
   private JButton addYearButton;
@@ -30,14 +31,11 @@ public class MainFrame {
   private JPanel branchesPanel;
   private JScrollPane branchesScrollPane;
 
-  private Year selectedYear;
-  private JButton selectedYearButton;
-
-  private Category selectedCategory;
-  private JButton selectedCategoryButton;
-
   private Color selectedColor = Color.CYAN;
   private Color unselectedColor = new JButton().getBackground();
+
+  private YearButton selectedYearButton;
+  private CategoryButton selectedCategoryButton;
 
   // #endregion
 
@@ -59,7 +57,7 @@ public class MainFrame {
     show();
   }
 
-  public void show() {
+  private void show() {
     root = new JFrame();
     root.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -76,13 +74,15 @@ public class MainFrame {
     root.setSize(new Dimension(1024, 720));
     root.setTitle("Planilha Financeira");
     root.setVisible(true);
+
+    showYears();
   }
 
-  public void generateFrame() {
+  private void generateFrame() {
     yearContainer = VisualBuilder.buildContainer();
     yearContainer.setPreferredSize(new Dimension(200, 0));
     addYearButton = VisualBuilder.buildButton("Adicionar ano");
-    yearsPanel = new JPanel();
+    yearsPanel = VisualBuilder.buildPanel();
     yearsScrollPane = VisualBuilder.buildScrollPane(yearsPanel);
     yearContainer.add(addYearButton);
     yearContainer.add(yearsScrollPane);
@@ -105,4 +105,132 @@ public class MainFrame {
 
   // #endregion
 
+  // #region methods to show
+
+  private void showYears() {
+    yearsPanel.removeAll();
+    for (int i = 0; i < sheet.getYears().size(); i++) {
+      Year year = sheet.getYears().get(i);
+      buildYearButton(year);
+    }
+    repaintVisual(yearsPanel);
+  }
+
+  private void showCategories() {
+    categoriesPanel.removeAll();
+    if (selectedYearButton != null) {
+      for (int i = 0; i < selectedYearButton.year.getCategories().size(); i++) {
+        Category category = selectedYearButton.year.getCategories().get(i);
+        buildCategoryButton(category);
+      }
+    }
+    repaintVisual(categoriesPanel);
+  }
+
+  // #endregion
+
+  // #region builders
+
+  private void buildYearButton(Year year) {
+    YearButton yearButton = new YearButton(year);
+    configureButtonBuilder(yearButton);
+    yearButton.addActionListener(this::yearButtonLogic);
+    yearsPanel.add(yearButton);
+  }
+
+  private void buildCategoryButton(Category category) {
+    CategoryButton categoryButton = new CategoryButton(category);
+    configureButtonBuilder(categoryButton);
+    categoryButton.addActionListener(this::categoryButtonLogic);
+    categoriesPanel.add(categoryButton);
+  }
+
+  private void configureButtonBuilder(JButton button) {
+    button.setFocusable(false);
+    button.setAlignmentX(0.5f);
+    button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+  }
+
+  // #endregion
+
+  // #region elements logic
+
+  public void yearButtonLogic(ActionEvent event) {
+    var yearButton = (YearButton) event.getSource();
+    if (selectedYearButton == null) {
+      selectedYearButton = yearButton;
+      selectedYearButton.setBackground(selectedColor);
+    } else {
+      if (selectedYearButton.equals(yearButton)) {
+        selectedYearButton.setBackground(unselectedColor);
+        selectedYearButton = null;
+      } else {
+        selectedYearButton.setBackground(unselectedColor);
+        selectedYearButton = yearButton;
+        selectedYearButton.setBackground(selectedColor);
+      }
+    }
+
+    showCategories();
+    repaintVisual(yearsPanel);
+  }
+
+  public void categoryButtonLogic(ActionEvent event) {
+    var categoryButton = (CategoryButton) event.getSource();
+    if (selectedCategoryButton == null) {
+      selectedCategoryButton = categoryButton;
+      selectedCategoryButton.setBackground(selectedColor);
+    } else {
+      if (selectedCategoryButton.equals(categoryButton)) {
+        selectedCategoryButton.setBackground(unselectedColor);
+        selectedCategoryButton = null;
+      } else {
+        selectedCategoryButton.setBackground(unselectedColor);
+        selectedCategoryButton = categoryButton;
+        selectedCategoryButton.setBackground(selectedColor);
+      }
+    }
+    repaintVisual(categoriesPanel);
+  }
+
+  // #endregion
+
+  // #region helpers
+
+  private void repaintVisual(JComponent component) {
+    component.revalidate();
+    component.repaint();
+  }
+
+  private void recolorAllSelectedButtons() {
+    if (selectedYearButton != null) {
+      selectedYearButton.setBackground(selectedColor);
+    }
+    if (selectedCategoryButton != null) {
+      selectedCategoryButton.setBackground(selectedColor);
+    }
+  }
+
+  // #endregion
+
+  // TODO: mostrar ramos criados
+  // TODO: logica para adicionar ano, categoria e ramo
+}
+
+class YearButton extends JButton {
+  public Year year;
+
+  public YearButton(Year year) {
+    super(year.getDisplayName());
+    this.year = year;
+  }
+}
+
+class CategoryButton extends JButton {
+  public Category category;
+
+  public CategoryButton(Category category) {
+    super(category.getDisplayName());
+    this.category = category;
+  }
 }
