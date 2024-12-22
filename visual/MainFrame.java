@@ -117,6 +117,7 @@ public class MainFrame {
     categoryContainer = VisualBuilder.buildContainer();
     categoryContainer.setPreferredSize(new Dimension(200, 0));
     addCategoryButton = VisualBuilder.buildButton("Adicionar categoria");
+    addCategoryButton.addActionListener(this::addCategoryButtonLogic);
     categoriesPanel = VisualBuilder.buildPanel();
     categoriesScrollPane = VisualBuilder.buildScrollPane(categoriesPanel);
     categoryContainer.add(addCategoryButton);
@@ -175,6 +176,10 @@ public class MainFrame {
   private void buildCategoryButton(Category category) {
     JButton categoryButton = new JButton(category.getDisplayName());
     configureButtonBuilder(categoryButton);
+    if (selectedCategoryButton != null && category == categoryButtons.get(selectedCategoryButton)) {
+      categoryButton.setBackground(selectedColor);
+      selectedCategoryButton = categoryButton;
+    }
     categoryButton.addActionListener(this::categoryButtonLogic);
     categoriesPanel.add(categoryButton);
     categoryButtons.put(categoryButton, category);
@@ -290,6 +295,45 @@ public class MainFrame {
         DialogHelper.showMessageDialog("Adicionar ano", "Ano já existe!", DialogType.ERROR);
       } else {
         DialogHelper.showMessageDialog("Adicionar ano", "Erro ao adicionar ano!", DialogType.ERROR);
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private void addCategoryButtonLogic(ActionEvent event) {
+    try {
+      if (selectedYearButton == null) {
+        DialogHelper.showMessageDialog("Adicionar categoria", "Selecione um ano!", DialogType.ERROR);
+        return;
+      }
+
+      String input = DialogHelper.showInputDialog("Adicionar categoria", "Digite o nome da categoria: ");
+
+      if (input == null) {
+        return;
+      }
+
+      input = input.trim().toLowerCase();
+
+      if (input.isEmpty()) {
+        DialogHelper.showMessageDialog("Adicionar categoria", "Categoria não pode estar vazia!", DialogType.ERROR);
+        return;
+      }
+
+      if (!input.matches("[a-zA-Z0-9 ]+")) {
+        DialogHelper.showMessageDialog("Adicionar categoria", "Categoria deve conter apenas letras, números e espaços!",
+            DialogType.ERROR);
+      }
+
+      yearButtons.get(selectedYearButton).addCategory(new Category(input));
+      showCategories();
+
+      DialogHelper.showMessageDialog("Adicionar categoria", "Categoria adicionada com sucesso!", DialogType.SUCCESS);
+    } catch (Exception e) {
+      if (e instanceof DuplicatedException) {
+        DialogHelper.showMessageDialog("Adicionar categoria", "Categoria já existe!", DialogType.ERROR);
+      } else {
+        DialogHelper.showMessageDialog("Adicionar categoria", "Erro ao adicionar categoria!", DialogType.ERROR);
         e.printStackTrace();
       }
     }
