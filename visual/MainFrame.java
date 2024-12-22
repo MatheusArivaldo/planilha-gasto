@@ -57,7 +57,7 @@ public class MainFrame {
 
     sheet.getYears().get(0).addCategory(new Category("alimentação"));
     sheet.getYears().get(0).addCategory(new Category("lazer"));
-    sheet.getYears().get(0).addCategory(new Category("Trabalho"));
+    sheet.getYears().get(0).addCategory(new Category("trabalho"));
 
     sheet.getYears().get(1).addCategory(new Category("moradia"));
     sheet.getYears().get(1).addCategory(new Category("estudo"));
