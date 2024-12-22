@@ -31,6 +31,8 @@ public class MainFrame {
   private JPanel branchesPanel;
   private JScrollPane branchesScrollPane;
 
+  private BranchTreePanel branchTreePanel;
+
   private Color selectedColor = Color.CYAN;
   private Color unselectedColor = new JButton().getBackground();
 
@@ -53,6 +55,25 @@ public class MainFrame {
 
     sheet.getYears().get(1).addCategory(new Category("Moradia"));
     sheet.getYears().get(1).addCategory(new Category("Estudo"));
+
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Comida", 100.0));
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Cafe", 10.0));
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Pizza", 30.0));
+
+    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("Cinema", 50.0));
+    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("Livros", 20.0));
+
+    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("Trabalho", 100.0));
+    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("Casa", 50.25));
+
+    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("Estudo", 100.0));
+    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("Escola", 20.0));
+
+    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("Comida", 100.0));
+    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("Cafe", 10.0));
+
+    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("Cinema", 50.0));
+    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("Livros", 20.0));
 
     show();
   }
@@ -99,8 +120,10 @@ public class MainFrame {
     addBranchButton = VisualBuilder.buildButton("Adicionar branch");
     branchesPanel = VisualBuilder.buildPanel();
     branchesScrollPane = VisualBuilder.buildScrollPane(branchesPanel);
+    branchTreePanel = new BranchTreePanel();
     branchContainer.add(addBranchButton);
     branchContainer.add(branchesScrollPane);
+    branchContainer.add(branchTreePanel);
   }
 
   // #endregion
@@ -125,6 +148,10 @@ public class MainFrame {
       }
     }
     repaintVisual(categoriesPanel);
+  }
+
+  private void showBranches() {
+
   }
 
   // #endregion
@@ -190,6 +217,7 @@ public class MainFrame {
         selectedCategoryButton.setBackground(selectedColor);
       }
     }
+    branchTreePanel.displayBranches(selectedCategoryButton.category);
     repaintVisual(categoriesPanel);
   }
 
