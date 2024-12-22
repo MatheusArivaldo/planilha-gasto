@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import models.*;
-import utils.*;
 
 public class MainFrame {
   // #region fields
@@ -150,10 +149,6 @@ public class MainFrame {
     repaintVisual(categoriesPanel);
   }
 
-  private void showBranches() {
-
-  }
-
   // #endregion
 
   // #region builders
@@ -230,7 +225,7 @@ public class MainFrame {
     component.repaint();
   }
 
-  private void recolorAllSelectedButtons() {
+  public void recolorAllSelectedButtons() {
     if (selectedYearButton != null) {
       selectedYearButton.setBackground(selectedColor);
     }
@@ -241,8 +236,6 @@ public class MainFrame {
 
   // #endregion
 
-  // TODO: mostrar ramos criados
-  // TODO: logica para adicionar ano, categoria e ramo
 }
 
 class YearButton extends JButton {
