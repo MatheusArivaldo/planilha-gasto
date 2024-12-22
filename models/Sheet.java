@@ -1,6 +1,7 @@
 package models;
 
 import utils.CustomArrayList;
+import utils.DuplicatedException;
 
 public class Sheet {
   private CustomArrayList<Year> years = new CustomArrayList<Year>();
@@ -26,7 +27,7 @@ public class Sheet {
   public boolean addYear(Year year) {
     for (int i = 0; i < years.size(); i++) {
       if (years.get(i).getYear() == year.getYear()) {
-        throw new IllegalArgumentException("Ano " + year.getYear() + " j&aacute; existe.");
+        throw new DuplicatedException("Ano " + year.getYear() + " já existe.");
       }
     }
 

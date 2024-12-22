@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import models.*;
+import utils.DuplicatedException;
+import visual.DialogHelper.DialogType;
 
 public class MainFrame {
   // #region fields
@@ -102,6 +104,7 @@ public class MainFrame {
     yearContainer = VisualBuilder.buildContainer();
     yearContainer.setPreferredSize(new Dimension(200, 0));
     addYearButton = VisualBuilder.buildButton("Adicionar ano");
+    addYearButton.addActionListener(this::addYearButtonLogic);
     yearsPanel = VisualBuilder.buildPanel();
     yearsScrollPane = VisualBuilder.buildScrollPane(yearsPanel);
     yearContainer.add(addYearButton);
@@ -177,7 +180,7 @@ public class MainFrame {
 
   // #region elements logic
 
-  public void yearButtonLogic(ActionEvent event) {
+  private void yearButtonLogic(ActionEvent event) {
     var yearButton = (YearButton) event.getSource();
     if (selectedYearButton == null) {
       selectedYearButton = yearButton;
@@ -186,6 +189,7 @@ public class MainFrame {
       if (selectedYearButton.equals(yearButton)) {
         selectedYearButton.setBackground(unselectedColor);
         selectedYearButton = null;
+        unselectCategory();
       } else {
         selectedYearButton.setBackground(unselectedColor);
         selectedYearButton = yearButton;
@@ -197,23 +201,33 @@ public class MainFrame {
     repaintVisual(yearsPanel);
   }
 
-  public void categoryButtonLogic(ActionEvent event) {
+  private void categoryButtonLogic(ActionEvent event) {
     var categoryButton = (CategoryButton) event.getSource();
     if (selectedCategoryButton == null) {
       selectedCategoryButton = categoryButton;
       selectedCategoryButton.setBackground(selectedColor);
+      branchTreePanel.displayBranches(selectedCategoryButton.category);
     } else {
       if (selectedCategoryButton.equals(categoryButton)) {
         selectedCategoryButton.setBackground(unselectedColor);
         selectedCategoryButton = null;
+        branchTreePanel.displayBranches(null);
       } else {
         selectedCategoryButton.setBackground(unselectedColor);
         selectedCategoryButton = categoryButton;
         selectedCategoryButton.setBackground(selectedColor);
+        branchTreePanel.displayBranches(selectedCategoryButton.category);
       }
     }
-    branchTreePanel.displayBranches(selectedCategoryButton.category);
     repaintVisual(categoriesPanel);
+  }
+
+  private void unselectCategory() {
+    if (selectedCategoryButton != null) {
+      selectedCategoryButton.setBackground(unselectedColor);
+      selectedCategoryButton = null;
+      branchTreePanel.displayBranches(null);
+    }
   }
 
   // #endregion
@@ -231,6 +245,42 @@ public class MainFrame {
     }
     if (selectedCategoryButton != null) {
       selectedCategoryButton.setBackground(selectedColor);
+    }
+  }
+
+  // #endregion
+
+  // #region add buttons
+
+  private void addYearButtonLogic(ActionEvent event) {
+    try {
+      String input = DialogHelper.showInputDialog("Adicionar ano", "Digite o nome do ano: ");
+
+      if (input == null) {
+        return;
+      }
+
+      if (input.isEmpty()) {
+        DialogHelper.showMessageDialog("Adicionar ano", "Ano não pode estar vazio!", DialogType.ERROR);
+        return;
+      }
+
+      input = input.trim();
+
+      int year = Integer.parseInt(input);
+      sheet.addYear(new Year(year));
+      showYears();
+
+      DialogHelper.showMessageDialog("Adicionar ano", "Ano adicionado com sucesso!", DialogType.SUCCESS);
+    } catch (Exception e) {
+      if (e instanceof NumberFormatException) {
+        DialogHelper.showMessageDialog("Adicionar ano", "Ano só deve conter números!", DialogType.ERROR);
+      } else if (e instanceof DuplicatedException) {
+        DialogHelper.showMessageDialog("Adicionar ano", "Ano já existe!", DialogType.ERROR);
+      } else {
+        DialogHelper.showMessageDialog("Adicionar ano", "Erro ao adicionar ano!", DialogType.ERROR);
+        e.printStackTrace();
+      }
     }
   }
 

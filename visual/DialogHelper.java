@@ -55,10 +55,10 @@ public class DialogHelper {
     int result = JOptionPane.showConfirmDialog(null, panel, title,
         JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-    if (result == JOptionPane.OK_OPTION && !input.getText().trim().isEmpty()) {
+    if (result == JOptionPane.OK_OPTION) {
       return input.getText().trim();
     }
-    return "";
+    return null;
   }
 
   public static String[] showDoubleInputDialog(String title, String message1, String message2) {
@@ -80,6 +80,6 @@ public class DialogHelper {
     if (result == JOptionPane.OK_OPTION && !input1.getText().trim().isEmpty() && !input2.getText().trim().isEmpty()) {
       return new String[] { input1.getText().trim(), input2.getText().trim() };
     }
-    return new String[] { "", "" };
+    return null;
   }
 }
