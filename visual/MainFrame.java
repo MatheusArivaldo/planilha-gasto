@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import models.*;
+import utils.CustomHashMap;
 import utils.DuplicatedException;
 import visual.DialogHelper.DialogType;
 
@@ -37,8 +38,11 @@ public class MainFrame {
   private Color selectedColor = Color.CYAN;
   private Color unselectedColor = new JButton().getBackground();
 
-  private YearButton selectedYearButton;
-  private CategoryButton selectedCategoryButton;
+  private JButton selectedYearButton;
+  private JButton selectedCategoryButton;
+
+  private CustomHashMap<JButton, Year> yearButtons = new CustomHashMap<JButton, Year>();
+  private CustomHashMap<JButton, Category> categoryButtons = new CustomHashMap<JButton, Category>();
 
   // #endregion
 
@@ -144,8 +148,8 @@ public class MainFrame {
   private void showCategories() {
     categoriesPanel.removeAll();
     if (selectedYearButton != null) {
-      for (int i = 0; i < selectedYearButton.year.getCategories().size(); i++) {
-        Category category = selectedYearButton.year.getCategories().get(i);
+      for (int i = 0; i < yearButtons.get(selectedYearButton).getCategories().size(); i++) {
+        Category category = yearButtons.get(selectedYearButton).getCategories().get(i);
         buildCategoryButton(category);
       }
     }
@@ -157,17 +161,23 @@ public class MainFrame {
   // #region builders
 
   private void buildYearButton(Year year) {
-    YearButton yearButton = new YearButton(year);
+    JButton yearButton = new JButton(year.getDisplayName());
     configureButtonBuilder(yearButton);
+    if (selectedYearButton != null && year == yearButtons.get(selectedYearButton)) {
+      yearButton.setBackground(selectedColor);
+      selectedYearButton = yearButton;
+    }
     yearButton.addActionListener(this::yearButtonLogic);
     yearsPanel.add(yearButton);
+    yearButtons.put(yearButton, year);
   }
 
   private void buildCategoryButton(Category category) {
-    CategoryButton categoryButton = new CategoryButton(category);
+    JButton categoryButton = new JButton(category.getDisplayName());
     configureButtonBuilder(categoryButton);
     categoryButton.addActionListener(this::categoryButtonLogic);
     categoriesPanel.add(categoryButton);
+    categoryButtons.put(categoryButton, category);
   }
 
   private void configureButtonBuilder(JButton button) {
@@ -181,7 +191,7 @@ public class MainFrame {
   // #region elements logic
 
   private void yearButtonLogic(ActionEvent event) {
-    var yearButton = (YearButton) event.getSource();
+    var yearButton = (JButton) event.getSource();
     if (selectedYearButton == null) {
       selectedYearButton = yearButton;
       selectedYearButton.setBackground(selectedColor);
@@ -194,6 +204,7 @@ public class MainFrame {
         selectedYearButton.setBackground(unselectedColor);
         selectedYearButton = yearButton;
         selectedYearButton.setBackground(selectedColor);
+        unselectCategory();
       }
     }
 
@@ -202,11 +213,11 @@ public class MainFrame {
   }
 
   private void categoryButtonLogic(ActionEvent event) {
-    var categoryButton = (CategoryButton) event.getSource();
+    var categoryButton = (JButton) event.getSource();
     if (selectedCategoryButton == null) {
       selectedCategoryButton = categoryButton;
       selectedCategoryButton.setBackground(selectedColor);
-      branchTreePanel.displayBranches(selectedCategoryButton.category);
+      branchTreePanel.displayBranches(categoryButtons.get(categoryButton));
     } else {
       if (selectedCategoryButton.equals(categoryButton)) {
         selectedCategoryButton.setBackground(unselectedColor);
@@ -216,7 +227,7 @@ public class MainFrame {
         selectedCategoryButton.setBackground(unselectedColor);
         selectedCategoryButton = categoryButton;
         selectedCategoryButton.setBackground(selectedColor);
-        branchTreePanel.displayBranches(selectedCategoryButton.category);
+        branchTreePanel.displayBranches(categoryButtons.get(categoryButton));
       }
     }
     repaintVisual(categoriesPanel);
@@ -286,22 +297,4 @@ public class MainFrame {
 
   // #endregion
 
-}
-
-class YearButton extends JButton {
-  public Year year;
-
-  public YearButton(Year year) {
-    super(year.getDisplayName());
-    this.year = year;
-  }
-}
-
-class CategoryButton extends JButton {
-  public Category category;
-
-  public CategoryButton(Category category) {
-    super(category.getDisplayName());
-    this.category = category;
-  }
 }
