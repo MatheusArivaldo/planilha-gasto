@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import models.*;
+import utils.DuplicatedException;
 import visual.DialogHelper.DialogType;
 
 public class MainFrame {
@@ -204,7 +205,7 @@ public class MainFrame {
             "Adicionar Ano",
             "Digite apenas o números!",
             DialogType.ERROR);
-      } else if (e instanceof IllegalArgumentException) {
+      } else if (e instanceof DuplicatedException) {
         DialogHelper.showMessageDialog(
             "Adicionar Ano",
             "Ano  " + input + " já existe!",
@@ -255,15 +256,14 @@ public class MainFrame {
       JButton categoryButton = createCategoryButton(category);
       categoriesPanel.add(categoryButton);
 
-      categoriesPanel.revalidate();
-      categoriesPanel.repaint();
+      updateCategories();
 
       DialogHelper.showMessageDialog(
           "Adicionar Categoria",
           "Categoria " + input + " adicionada com sucesso!",
           DialogType.SUCCESS);
     } catch (Exception e) {
-      if (e instanceof IllegalArgumentException) {
+      if (e instanceof DuplicatedException) {
         DialogHelper.showMessageDialog(
             "Adicionar Categoria",
             "Categoria " + input + " ja existe!",
@@ -312,9 +312,6 @@ public class MainFrame {
       Branch branch = new Branch(inputs[0], Double.parseDouble(inputs[1]));
       selectedCategory.addBranch(branch);
 
-      branchesPanel.revalidate();
-      branchesPanel.repaint();
-
       updateCategories();
 
       DialogHelper.showMessageDialog(
@@ -322,10 +319,15 @@ public class MainFrame {
           "Branch " + inputs[0] + " adicionada com sucesso!",
           DialogType.SUCCESS);
     } catch (Exception e) {
-      if (e instanceof IllegalArgumentException) {
+      if (e instanceof CloneNotSupportedException) {
         DialogHelper.showMessageDialog(
             "Adicionar Branch",
             "Branch " + inputs[0] + " ja existe!",
+            DialogType.ERROR);
+      } else if (e instanceof NumberFormatException) {
+        DialogHelper.showMessageDialog(
+            "Adicionar Branch",
+            "O valor deve ser um número!",
             DialogType.ERROR);
       } else {
         DialogHelper.showMessageDialog(
@@ -335,8 +337,6 @@ public class MainFrame {
         e.printStackTrace();
       }
     }
-
-    System.err.println("Add Branch");
   }
 
   // #endregion
@@ -357,10 +357,8 @@ public class MainFrame {
   }
 
   public void updateCategories() {
+    System.err.println("Update categories");
     categoriesPanel.removeAll();
-    selectedCategory = null;
-    selectedCategoryButton = null;
-
     if (selectedYear != null) {
       for (int i = 0; i < selectedYear.getCategories().size(); i++) {
         Category category = selectedYear.getCategories().get(i);
@@ -374,7 +372,23 @@ public class MainFrame {
   }
 
   public void updateBranches() {
+    updateCategorySelectedVisual();
+  }
 
+  public void unselectCategory() {
+    if (selectedCategory != null) {
+      System.err.println("Unselect category");
+      selectedCategoryButton.setBackground(unselectedColor);
+      selectedCategory = null;
+      selectedCategoryButton = null;
+    }
+  }
+
+  public void updateCategorySelectedVisual() {
+    if (selectedCategoryButton != null) {
+      selectedCategoryButton.setBackground(selectedColor);
+      System.err.println("Update category selected visual");
+    }
   }
 
   // #endregion
@@ -419,6 +433,7 @@ public class MainFrame {
       selectedYearButton.setBackground(selectedColor);
     }
 
+    unselectCategory();
     updateCategories();
   }
 

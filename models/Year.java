@@ -1,6 +1,6 @@
 package models;
 
-import utils.CustomArrayList;
+import utils.*;
 
 public class Year {
   private int year;
@@ -36,7 +36,7 @@ public class Year {
   public void addCategory(Category category) {
     for (int i = 0; i < categories.size(); i++) {
       if (categories.get(i).getName().equals(category.getName())) {
-        throw new IllegalArgumentException("Categoria " + category.getName() + " já existe.");
+        throw new DuplicatedException("Categoria " + category.getName() + " já existe.");
       }
     }
 

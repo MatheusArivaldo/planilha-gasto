@@ -1,6 +1,6 @@
 package models;
 
-import utils.CustomArrayList;
+import utils.*;
 
 public class Category {
   private String name;
@@ -30,7 +30,7 @@ public class Category {
   }
 
   public String getDisplayName() {
-    return name + " [" + getTotalValue() + "]";
+    return name + " [" + CustomUtilities.formatToCurrency(getTotalValue()) + "]";
   }
 
   // #endregion
@@ -40,7 +40,8 @@ public class Category {
   public void addBranch(Branch branch) {
     for (int i = 0; i < branches.size(); i++) {
       if (branches.get(i).getName().equals(branch.getName())) {
-        throw new IllegalArgumentException("Branch " + branch.getName() + " already exists.");
+        System.err.println("Branch name: " + branches.get(i).getName() + " - " + branch.getName());
+        throw new DuplicatedException("Branch " + branch.getName() + " already exists.");
       }
     }
 

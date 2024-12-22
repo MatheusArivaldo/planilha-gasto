@@ -1,6 +1,6 @@
 package models;
 
-import utils.CustomArrayList;
+import utils.*;
 
 public class Branch {
   private String name;
@@ -41,7 +41,7 @@ public class Branch {
   }
 
   public String getDisplayName() {
-    return name + " (" + value + ")" + "[" + getTotalValue() + "]";
+    return name + " (" + value + ")" + "[" + CustomUtilities.formatToCurrency(getTotalValue()) + "]";
   }
 
   public void setParent(Branch parent) {
