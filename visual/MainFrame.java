@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import models.*;
 import utils.CustomHashMap;
@@ -54,31 +55,31 @@ public class MainFrame {
     sheet.addYear(new Year(2020));
     sheet.addYear(new Year(2021));
 
-    sheet.getYears().get(0).addCategory(new Category("Alimentação"));
-    sheet.getYears().get(0).addCategory(new Category("Lazer"));
+    sheet.getYears().get(0).addCategory(new Category("alimentação"));
+    sheet.getYears().get(0).addCategory(new Category("lazer"));
     sheet.getYears().get(0).addCategory(new Category("Trabalho"));
 
-    sheet.getYears().get(1).addCategory(new Category("Moradia"));
-    sheet.getYears().get(1).addCategory(new Category("Estudo"));
+    sheet.getYears().get(1).addCategory(new Category("moradia"));
+    sheet.getYears().get(1).addCategory(new Category("estudo"));
 
-    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Comida", 100.0));
-    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Cafe", 10.0));
-    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("Pizza", 30.0));
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("comida", 100.0));
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("cafe", 10.0));
+    sheet.getYears().get(0).getCategories().get(0).addBranch(new Branch("pizza", 30.0));
 
-    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("Cinema", 50.0));
-    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("Livros", 20.0));
+    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("cinema", 50.0));
+    sheet.getYears().get(0).getCategories().get(1).addBranch(new Branch("livros", 20.0));
 
-    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("Trabalho", 100.0));
-    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("Casa", 50.25));
+    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("trabalho", 100.0));
+    sheet.getYears().get(1).getCategories().get(0).addBranch(new Branch("casa", 50.25));
 
-    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("Estudo", 100.0));
-    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("Escola", 20.0));
+    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("estudo", 100.0));
+    sheet.getYears().get(1).getCategories().get(1).addBranch(new Branch("escola", 20.0));
 
-    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("Comida", 100.0));
-    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("Cafe", 10.0));
+    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("comida", 100.0));
+    sheet.getYears().get(0).getCategories().get(0).getBranches().get(0).addBranch(new Branch("cafe", 10.0));
 
-    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("Cinema", 50.0));
-    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("Livros", 20.0));
+    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("cinema", 50.0));
+    sheet.getYears().get(0).getCategories().get(1).getBranches().get(0).addBranch(new Branch("livros", 20.0));
 
     show();
   }
@@ -125,6 +126,7 @@ public class MainFrame {
 
     branchContainer = VisualBuilder.buildContainer();
     addBranchButton = VisualBuilder.buildButton("Adicionar branch");
+    addBranchButton.addActionListener(this::addBranchButtonLogic);
     branchesPanel = VisualBuilder.buildPanel();
     branchesScrollPane = VisualBuilder.buildScrollPane(branchesPanel);
     branchTreePanel = new BranchTreePanel();
@@ -337,6 +339,110 @@ public class MainFrame {
         e.printStackTrace();
       }
     }
+  }
+
+  private void addBranchButtonLogic(ActionEvent event) {
+    try {
+      if (selectedCategoryButton == null) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Selecione uma categoria!", DialogType.ERROR);
+        return;
+      }
+
+      String[] inputs = DialogHelper.showDoubleInputDialog(
+          "Adicionar branch",
+          "Digite o nome da branch:",
+          "Digite o valor da branch:");
+
+      if (inputs == null) {
+        return;
+      }
+
+      String name = inputs[0].trim().toLowerCase();
+      String valueStr = inputs[1].trim();
+
+      if (name.isEmpty()) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Nome da branch não pode estar vazio!", DialogType.ERROR);
+        return;
+      }
+
+      if (valueStr.isEmpty()) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Valor da branch não pode estar vazio!", DialogType.ERROR);
+        return;
+      }
+
+      if (!name.matches("[a-zA-Z0-9 ]+")) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Nome deve conter apenas letras, números e espaços!",
+            DialogType.ERROR);
+        return;
+      }
+
+      double value;
+      try {
+        value = Double.parseDouble(valueStr.replace(",", "."));
+      } catch (NumberFormatException e) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Valor deve ser um número válido!", DialogType.ERROR);
+        return;
+      }
+
+      DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) branchTreePanel.getTree()
+          .getLastSelectedPathComponent();
+      Branch newBranch = new Branch(name, value);
+
+      if (selectedNode == null || selectedNode.isRoot()) {
+        categoryButtons.get(selectedCategoryButton).addBranch(newBranch);
+      } else {
+        String parentNodeText = selectedNode.getUserObject().toString();
+        Category category = categoryButtons.get(selectedCategoryButton);
+        Branch parentBranch = findBranch(category, parentNodeText);
+
+        if (parentBranch != null) {
+          parentBranch.addBranch(newBranch);
+          newBranch.setParent(parentBranch);
+        } else {
+          DialogHelper.showMessageDialog("Adicionar branch", "Branch pai não encontrada!", DialogType.ERROR);
+          return;
+        }
+      }
+
+      branchTreePanel.displayBranches(categoryButtons.get(selectedCategoryButton));
+
+      selectedCategoryButton.setText(categoryButtons.get(selectedCategoryButton).getDisplayName());
+
+      DialogHelper.showMessageDialog("Adicionar branch", "Branch adicionada com sucesso!", DialogType.SUCCESS);
+
+    } catch (Exception e) {
+      if (e instanceof DuplicatedException) {
+        DialogHelper.showMessageDialog("Adicionar branch", "Branch já existe!", DialogType.ERROR);
+      } else {
+        DialogHelper.showMessageDialog("Adicionar branch", "Erro ao adicionar branch!", DialogType.ERROR);
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private Branch findBranch(Category category, String displayName) {
+    for (int i = 0; i < category.getBranches().size(); i++) {
+      Branch result = findBranchRecursive(category.getBranches().get(i), displayName);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  private Branch findBranchRecursive(Branch current, String displayName) {
+    if (current.getDisplayName().equals(displayName)) {
+      return current;
+    }
+
+    for (int i = 0; i < current.getChildren().size(); i++) {
+      Branch result = findBranchRecursive(current.getChildren().get(i), displayName);
+      if (result != null) {
+        return result;
+      }
+    }
+
+    return null;
   }
 
   // #endregion

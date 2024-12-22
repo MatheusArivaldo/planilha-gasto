@@ -47,6 +47,10 @@ public class BranchTreePanel extends JPanel {
     treeModel.reload();
   }
 
+  public JTree getTree() {
+    return tree;
+  }
+
   private void addBranchToTree(Branch branch, DefaultMutableTreeNode parentNode) {
     DefaultMutableTreeNode branchNode = new DefaultMutableTreeNode(branch.getDisplayName());
     parentNode.add(branchNode);
